@@ -365,6 +365,7 @@ public:
     template <typename T> void setData(const std::vector<T>& data);
     /** Returns a reference to a data point */
     template <typename T> T& at(uint16_t sample, uint16_t channel);
+    template <typename T> T& at(size_t index);
 
     const std::vector<float>& getTraj() const;
     void setTraj(const std::vector<float>& traj);

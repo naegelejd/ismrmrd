@@ -512,6 +512,12 @@ template void Acquisition::setData(const std::vector<std::complex<float> >& data
 template void Acquisition::setData(const std::vector<std::complex<double> >& data);
 
 template <typename T> T& Acquisition::at(uint16_t sample, uint16_t channel) {
+    if (sample > getNumberOfSamples()) {
+        throw std::runtime_error("sample greater than number of samples");
+    }
+    if (channel > getActiveChannels()) {
+        throw std::runtime_error("channel greater than number of active channels");
+    }
     T* data = reinterpret_cast<T*>(&data_[0]);
     return data[sample + channel * getNumberOfSamples()];
 }
@@ -524,6 +530,23 @@ template float& Acquisition::at(uint16_t sample, uint16_t channel);
 template double& Acquisition::at(uint16_t sample, uint16_t channel);
 template std::complex<float> & Acquisition::at(uint16_t sample, uint16_t channel);
 template std::complex<double> & Acquisition::at(uint16_t sample, uint16_t channel);
+
+template <typename T> T& Acquisition::at(size_t index) {
+    if (index >= data_.size() / sizeof(T)) {
+        throw std::runtime_error("index out of bounds");
+    }
+    T* data = reinterpret_cast<T*>(&data_[0]);
+    return data[index];
+}
+
+template uint16_t& Acquisition::at(size_t index);
+template int16_t& Acquisition::at(size_t index);
+template uint32_t& Acquisition::at(size_t index);
+template int32_t& Acquisition::at(size_t index);
+template float& Acquisition::at(size_t index);
+template double& Acquisition::at(size_t index);
+template std::complex<float> & Acquisition::at(size_t index);
+template std::complex<double> & Acquisition::at(size_t index);
 
 const std::vector<float>& Acquisition::getTraj() const {
     return traj_;

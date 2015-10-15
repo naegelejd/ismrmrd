@@ -310,6 +310,7 @@ Acquisition Dataset::readAcquisition(unsigned long index, int stream_number)
 
     // TODO: fix this ASAP:
     memcpy(const_cast<std::complex<float>*>(&tmp[0]), obj.data.p, sizeof(float) * obj.data.len);
+    acq.setData(tmp);
     memcpy(const_cast<float*>(&acq.getTraj()[0]), obj.traj.p, sizeof(float) * obj.traj.len);
 
     free(obj.data.p);

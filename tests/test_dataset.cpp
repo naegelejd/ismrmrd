@@ -200,20 +200,19 @@ BOOST_AUTO_TEST_CASE(dataset_read_acquisitions)
     acq_in.setSampleTime_us(5.0);
 
     // add fake noise data
-    std::vector<std::complex<float> > noise_data(acq.getNumberOfDataElements());
-    for (std::vector<std::complex<float> >::iterator it = noise_data.begin();
-            it != noise_data.end(); ++it) {
-        *it = std::complex<float>(5, -7);
+    for (int i = 0; i < acq_in.getNumberOfDataElements(); i++) {
+        acq_in.at<std::complex<float> >(i) = i / acq_in.getNumberOfDataElements();
     }
 
     unsigned int noise_stream = nechoes;
     BOOST_CHECK_NO_THROW(dataset.appendAcquisition(acq_in, noise_stream));
     Acquisition acq_out = dataset.readAcquisition(0, noise_stream);
     BOOST_CHECK(acq_in.getHead() == acq_out.getHead());
-    BOOST_CHECK_EQUAL_COLLECTIONS(acq_in.getData<std::complex<float> >().begin(),
-            acq_in.getData<std::complex<float> >().end(),
-            acq_out.getData<std::complex<float> >().begin(),
-            acq_out.getData<std::complex<float> >().end());
+
+    std::vector<std::complex<float> > acq_in_data = acq_in.getData<std::complex<float> >();
+    std::vector<std::complex<float> > acq_out_data = acq_out.getData<std::complex<float> >();
+    BOOST_CHECK_EQUAL_COLLECTIONS(acq_in_data.begin(), acq_in_data.end(),
+            acq_out_data.begin(), acq_out_data.end());
 
     // TODO: test trajectory
 
@@ -233,6 +232,7 @@ BOOST_AUTO_TEST_CASE(dataset_read_acquisitions)
             // stuff very fake data into the acquisition
             std::vector<std::complex<float> > data(ncoils*readout, std::complex<float>(l, e));
             acq_in.setData(data);
+
             BOOST_CHECK_NO_THROW(dataset.appendAcquisition(acq_in, e));
         }
     }
@@ -258,13 +258,12 @@ BOOST_AUTO_TEST_CASE(dataset_read_acquisitions)
             BOOST_CHECK_EQUAL(acq.getSampleTime_us(), 5.0);
 
             std::vector<std::complex<float> > data(ncoils*readout, std::complex<float>(l, e));
-
+            std::vector<std::complex<float> > acq1_data = acq.getData<std::complex<float> >();
+            std::vector<std::complex<float> > acq2_data = acq2.getData<std::complex<float> >();
             BOOST_CHECK_EQUAL_COLLECTIONS(data.begin(), data.end(),
-                    acq.getData<std::complex<float> >().begin(),
-                    acq.getData<std::complex<float> >().end());
+                    acq1_data.begin(), acq1_data.end());
             BOOST_CHECK_EQUAL_COLLECTIONS(data.begin(), data.end(),
-                    acq2.getData<std::complex<float> >().begin(),
-                    acq2.getData<std::complex<float> >().end());
+                    acq2_data.begin(), acq2_data.end());
         }
     }
 }
