@@ -215,6 +215,8 @@
   <xs:simpleType name="dataType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="MRAcquisition"/>
+      <xs:enumeration value="Waveform"/>
+      <xs:enumeration value="Image"/>
     </xs:restriction>
   </xs:simpleType>
 

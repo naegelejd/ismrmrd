@@ -122,6 +122,8 @@ BOOST_AUTO_TEST_CASE(dataset_append_acquisitions)
 
     Acquisition acq;
 
+    acq.setStorageType(ISMRMRD_CXFLOAT);
+
     unsigned int matrix_size = 256;
     unsigned int ncoils = 8;
     unsigned int readout_oversampling = 2;
@@ -132,9 +134,12 @@ BOOST_AUTO_TEST_CASE(dataset_append_acquisitions)
     acq.resize(readout, ncoils);
     acq.setFlag(ISMRMRD_ACQ_IS_NOISE_MEASUREMENT);
     acq.setSampleTime_us(5.0);
+
     // add fake noise data
-    for (size_t i = 0; i < acq.getNumberOfDataElements(); i++) {
-        acq.getData()[i] = i / acq.getNumberOfDataElements();
+    std::vector<std::complex<float> > noise_data(acq.getNumberOfDataElements());
+    for (std::vector<std::complex<float> >::iterator it = noise_data.begin();
+            it != noise_data.end(); ++it) {
+        *it = std::complex<float>(5, -7);
     }
     unsigned int noise_stream = repetitions;
     BOOST_CHECK_NO_THROW(dataset.appendAcquisition(acq, noise_stream));
@@ -162,7 +167,7 @@ BOOST_AUTO_TEST_CASE(dataset_append_acquisitions)
 
                 for (unsigned int c = 0; c < ncoils; ++c) {
                     for (unsigned int s = 0; s < readout; ++s) {
-                        acq.at(s, c) = c * s;
+                        acq.at<std::complex<float> >(s, c) = std::complex<float>(c*s, c*s);
                     }
                 }
                 BOOST_CHECK_NO_THROW(dataset.appendAcquisition(acq, r));
@@ -189,19 +194,27 @@ BOOST_AUTO_TEST_CASE(dataset_read_acquisitions)
     unsigned int readout = matrix_size * readout_oversampling;
 
     Acquisition acq_in;
+    acq_in.setStorageType(ISMRMRD_CXFLOAT);
     acq_in.resize(readout, ncoils);
     acq_in.setFlag(ISMRMRD_ACQ_IS_NOISE_MEASUREMENT);
     acq_in.setSampleTime_us(5.0);
+
     // add fake noise data
-    for (size_t i = 0; i < acq_in.getNumberOfDataElements(); i++) {
-        acq_in.getData()[i] = i / acq_in.getNumberOfDataElements();
+    std::vector<std::complex<float> > noise_data(acq.getNumberOfDataElements());
+    for (std::vector<std::complex<float> >::iterator it = noise_data.begin();
+            it != noise_data.end(); ++it) {
+        *it = std::complex<float>(5, -7);
     }
+
     unsigned int noise_stream = nechoes;
     BOOST_CHECK_NO_THROW(dataset.appendAcquisition(acq_in, noise_stream));
     Acquisition acq_out = dataset.readAcquisition(0, noise_stream);
     BOOST_CHECK(acq_in.getHead() == acq_out.getHead());
-    BOOST_CHECK_EQUAL_COLLECTIONS(acq_in.getData().begin(), acq_in.getData().end(),
-            acq_out.getData().begin(), acq_out.getData().end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(acq_in.getData<std::complex<float> >().begin(),
+            acq_in.getData<std::complex<float> >().end(),
+            acq_out.getData<std::complex<float> >().begin(),
+            acq_out.getData<std::complex<float> >().end());
+
     // TODO: test trajectory
 
     for (unsigned int l = 0; l < matrix_size; ++l) {
@@ -247,9 +260,11 @@ BOOST_AUTO_TEST_CASE(dataset_read_acquisitions)
             std::vector<std::complex<float> > data(ncoils*readout, std::complex<float>(l, e));
 
             BOOST_CHECK_EQUAL_COLLECTIONS(data.begin(), data.end(),
-                    acq.getData().begin(), acq.getData().end());
+                    acq.getData<std::complex<float> >().begin(),
+                    acq.getData<std::complex<float> >().end());
             BOOST_CHECK_EQUAL_COLLECTIONS(data.begin(), data.end(),
-                    acq2.getData().begin(), acq2.getData().end());
+                    acq2.getData<std::complex<float> >().begin(),
+                    acq2.getData<std::complex<float> >().end());
         }
     }
 }

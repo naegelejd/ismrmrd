@@ -214,14 +214,14 @@ IsmrmrdHeader build_model_header(void)
     Stream stream1;
     stream1.name = "k-space";
     stream1.storageType = ISMRMRD_CXFLOAT;
-    stream1.dataType = "MRAcquisition";
+    stream1.dataType = ISMRMRD_ACQUISITION;
     stream1.number = 0;
     head.streams.push_back(stream1);
 
     Stream stream2;
     stream2.name = "ECG";
     stream2.storageType = ISMRMRD_FLOAT;
-    stream2.dataType = "MRAcquisition";
+    stream2.dataType = ISMRMRD_ACQUISITION;
     stream2.number = 2;
     head.streams.push_back(stream2);
 

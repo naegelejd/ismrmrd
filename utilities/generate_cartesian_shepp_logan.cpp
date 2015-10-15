@@ -133,7 +133,7 @@ int main(int argc, char** argv)
                 acq.setSampleTime_us(5.0);
                 for (size_t c = 0; c < ncoils; c++) {
                     for (size_t s = 0; s < readout; s++) {
-                        acq.at(s, c) = cm.at(s, i, c);
+                        acq.at<std::complex<float> >(s, c) = cm.at(s, i, c);
                     }
                 }
 
@@ -194,7 +194,7 @@ int main(int argc, char** argv)
     Stream stream;
     // stream.name = "data";
     stream.storageType = ISMRMRD_CXFLOAT;
-    stream.dataType = "MRAcquisition";
+    stream.dataType = ISMRMRD_ACQUISITION;
     stream.number = 0;
 
     h.streams.push_back(stream);

@@ -43,23 +43,30 @@ BOOST_AUTO_TEST_CASE(acquisition_getters_setters)
 {
     Acquisition acq;
 
-    // TODO: implement
+    // The acquisition has no storage_type, so getData will fail!
+    BOOST_CHECK_THROW(acq.getData<float>(), std::runtime_error);
+
+    // TODO: implement more checks!
 }
 
 BOOST_AUTO_TEST_CASE(acquisition_resize)
 {
     Acquisition acq;
     check_header(acq.getHead());
-    BOOST_CHECK_EQUAL(acq.getData().size(), 0);
+
+    acq.setStorageType(ISMRMRD_FLOAT);
+
+    BOOST_CHECK_EQUAL(acq.getData<float>().size(), 0);
 
     acq.resize(72, 32);
     BOOST_CHECK_EQUAL(acq.getNumberOfSamples(), 72);
     BOOST_CHECK_EQUAL(acq.getActiveChannels(), 32);
-    BOOST_CHECK_EQUAL(acq.getData().size(), 72*32);
+    BOOST_CHECK_EQUAL(acq.getData<float>().size(), 72*32);
 
     std::vector<float> zeros(72*32, 0);
+    std::vector<float> data = acq.getData<float>();
     BOOST_CHECK_EQUAL_COLLECTIONS(zeros.begin(), zeros.end(),
-            acq.getData().begin(), acq.getData().end());
+            data.begin(), data.end());
 }
 
 static void check_header(const AcquisitionHeader& chead)

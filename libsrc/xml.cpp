@@ -135,7 +135,15 @@ namespace ISMRMRD
             s.name = std::string(name.child_value());
         }
 
-        s.dataType = std::string(dataType.child_value());
+        std::string dtype(dataType.child_value());
+        if (dtype == "MRAcquisition") {
+            s.dataType = ISMRMRD_ACQUISITION;
+        } else if (dtype == "Waveform") {
+            s.dataType = ISMRMRD_WAVEFORM;
+        } else if (dtype == "Image") {
+            s.dataType = ISMRMRD_IMAGE;
+        }
+
         s.number = std::atoi(number.child_value());
 
         std::string storage(storageType.child_value());
@@ -564,7 +572,23 @@ namespace ISMRMRD
   {
     pugi::xml_node s = parent.append_child("stream");
     append_node(s, "name", stream.name);
-    append_node(s, "dataType", stream.dataType);
+
+    std::string dataType;
+    switch (stream.dataType) {
+    case ISMRMRD_ACQUISITION:
+        dataType = "MRAcquisition";
+        break;
+    case ISMRMRD_WAVEFORM:
+        dataType = "Waveform";
+        break;
+    case ISMRMRD_IMAGE:
+        dataType = "Image";
+        break;
+    default:
+        throw std::runtime_error("Invalid stream dataType ID.");
+    }
+    append_node(s, "dataType", dataType);
+
     append_node(s, "number", stream.number);
 
     std::string storageType;
@@ -594,7 +618,7 @@ namespace ISMRMRD
         storageType = "cxdouble";
         break;
     default:
-        throw std::runtime_error("Invalid storageType ID.");
+        throw std::runtime_error("Invalid stream storageType ID.");
     }
 
     append_node(s, "storageType", storageType);

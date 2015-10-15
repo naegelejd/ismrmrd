@@ -102,7 +102,7 @@ int main(int argc, char** argv)
         //Copy data, we should probably be more careful here and do more tests....
         for (uint16_t c=0; c<nCoils; c++) {
             memcpy(&buffer.at(0, acq.getEncodingCounters().kspace_encode_step_1, c),
-                    &acq.at(0, c), sizeof(std::complex<float>) * nX);
+                    &acq.at<std::complex<float> >(0, c), sizeof(std::complex<float>) * nX);
         }
     }
 

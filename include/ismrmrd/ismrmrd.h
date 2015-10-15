@@ -63,8 +63,11 @@ enum StorageType {
     ISMRMRD_CXDOUBLE = 8  /**< corresponds to complex double */
 };
 
-/** Returns the size in bytes of an StorageType */
-size_t ismrmrd_sizeof_storage_type(int storage_type);
+enum EntityType {
+    ISMRMRD_ACQUISITION = 1,
+    ISMRMRD_WAVEFORM = 2,
+    ISMRMRD_IMAGE = 3
+};
 
 /** Acquisition Flags */
 enum AcquisitionFlags {
@@ -244,6 +247,7 @@ public:
     uint16_t getVersion() const;
 
     StorageType getStorageType() const;
+    void setStorageType(StorageType st);
 
     uint16_t getStreamNumber() const;
     void setStreamNumber(uint16_t);
@@ -353,11 +357,14 @@ public:
     const AcquisitionHeader& getHead() const;
     void setHead(const AcquisitionHeader &other);
 
-    std::vector<std::complex<float> >& getData();
-    const std::vector<std::complex<float> >& getData() const;
-    void setData(const std::vector<std::complex<float> >& data);
+    char* getDataPtr();
+    size_t getDataSizeInBytes();
+
+    template <typename T> std::vector<T> getData();
+    template <typename T> const std::vector<T> getData() const;
+    template <typename T> void setData(const std::vector<T>& data);
     /** Returns a reference to a data point */
-    std::complex<float>& at(uint16_t sample, uint16_t channel);
+    template <typename T> T& at(uint16_t sample, uint16_t channel);
 
     const std::vector<float>& getTraj() const;
     void setTraj(const std::vector<float>& traj);
@@ -385,9 +392,9 @@ public:
 protected:
     void makeConsistent();
 
-    AcquisitionHeader head;
-    std::vector<float> traj;
-    std::vector<std::complex<float> > data;
+    AcquisitionHeader head_;
+    std::vector<float> traj_;
+    std::vector<char> data_;
 };
 
 
@@ -532,10 +539,6 @@ public:
     // Data
     std::vector<T>& getData();
     const std::vector<T>& getData() const;
-    /** Returns the number of elements in the image data **/
-    size_t getNumberOfDataElements() const;
-    /** Returns the size of the image data in bytes **/
-    size_t getDataSize() const;
 
     /** Returns a reference to the image data **/
     T& at(uint16_t x, uint16_t y=0, uint16_t z=0, uint16_t channel=0);
@@ -543,9 +546,9 @@ public:
 protected:
     void makeConsistent();
 
-    ImageHeader head;
-    std::string attribute_string;
-    std::vector<T> data;
+    ImageHeader head_;
+    std::string attribute_string_;
+    std::vector<T> data_;
 };
 
 /// N-Dimensional array type
@@ -560,11 +563,10 @@ public:
     StorageType getStorageType() const;
     uint16_t getNDim() const;
     const std::vector<size_t>& getDims();
-    size_t getDataSize() const;
     void resize(const std::vector<size_t>& dims);
-    size_t getNumberOfElements() const;
     std::vector<T>& getData();
     const std::vector<T>& getData() const;
+    size_t getNumberOfElements() const;
 
     // Returns a reference to the image data
     T& at(uint16_t x, uint16_t y=0, uint16_t z=0, uint16_t w=0, uint16_t n=0, uint16_t m=0, uint16_t l=0);
@@ -572,9 +574,9 @@ public:
 protected:
     void makeConsistent();
 
-    uint16_t version;
-    std::vector<size_t> dims;
-    std::vector<T> data;
+    uint16_t version_;
+    std::vector<size_t> dims_;
+    std::vector<T> data_;
 };
 
 
